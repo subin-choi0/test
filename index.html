@@ -734,14 +734,15 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 
 
 			// ==========================================
-			    // 두 번째 게임: 점핑 거북이 로직
+			    // 두 번째 게임: 더블 점프 거북이 로직
 			    // ==========================================
 			    const jCanvas = document.getElementById("jumpCanvas");
 			    const jCtx = jCanvas.getContext("2d");
 			    const jumpStartBtn = document.getElementById("jumpStartBtn");
 			    const jumpScoreEl = document.getElementById("jumpScore");
 			
-			    let turtle = { x: 50, y: 160, vy: 0, gravity: 0.8, jumpPower: -12, isGrounded: true };
+			    // jumpCount를 추가하여 최대 2단 점프(더블 점프)가 가능하도록 설정
+			    let turtle = { x: 50, y: 160, vy: 0, gravity: 0.8, jumpPower: -11, jumpCount: 0 };
 			    let obstacles = [];
 			    let jFrame = 0;
 			    let jScore = 0;
@@ -752,20 +753,21 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 			    function startJumpGame() {
 			        turtle.y = 160; 
 			        turtle.vy = 0;
+			        turtle.jumpCount = 0;
 			        obstacles = [];
 			        jFrame = 0; 
 			        jScore = 0;
 			        jGameActive = true;
 			        jumpScoreEl.innerText = "Score: 0";
 			        clearInterval(jGameLoop);
-			        jGameLoop = setInterval(updateJumpGame, 20); // 1초에 50번 화면 갱신(부드러운 움직임)
+			        jGameLoop = setInterval(updateJumpGame, 20); 
 			    }
 			
-			    // 점프 동작
+			    // 더블 점프 로직 적용
 			    function jump() {
-			        if (turtle.isGrounded && jGameActive) {
-			            turtle.vy = turtle.jumpPower;
-			            turtle.isGrounded = false;
+			        if (jGameActive && turtle.jumpCount < 2) { // 2번까지만 점프 허용
+			            turtle.vy = turtle.jumpPower; 
+			            turtle.jumpCount++; // 점프 횟수 증가
 			        }
 			    }
 			
@@ -774,14 +776,14 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 			        jFrame++;
 			        jCtx.clearRect(0, 0, jCanvas.width, jCanvas.height);
 			
-			        // 거북이 물리엔진 (중력 작용)
+			        // 거북이 물리엔진
 			        turtle.vy += turtle.gravity;
 			        turtle.y += turtle.vy;
 			        
-			        // 바닥에 닿았을 때
+			        // 바닥에 닿았을 때 (점프 횟수 초기화)
 			        if (turtle.y >= 160) { 
 			            turtle.y = 160;
-			            turtle.isGrounded = true;
+			            turtle.jumpCount = 0; // 바닥에 닿으면 다시 2단 점프 가능
 			            turtle.vy = 0;
 			        }
 			
@@ -791,30 +793,40 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 			        jCtx.textBaseline = "middle";
 			        jCtx.fillText("🐢", turtle.x, turtle.y);
 			
-			        // 장애물 생성 (일정 프레임마다)
+			        // 장애물 생성 (무작위 높이)
 			        if (jFrame % 70 === 0) { 
-			            // 속도는 갈수록 미세하게 빨라집니다.
 			            let speed = 5 + (jScore / 50); 
-			            obstacles.push({ x: jCanvas.width + 20, y: 160, speed: speed });
+			            // 50% 확률로 큰 산호(tall)와 작은 암초(short) 결정
+			            let type = Math.random() > 0.5 ? "tall" : "short"; 
+			            obstacles.push({ x: jCanvas.width + 20, y: 160, speed: speed, type: type });
 			        }
 			
 			        // 장애물 이동 및 그리기
 			        for (let i = 0; i < obstacles.length; i++) {
 			            let obs = obstacles[i];
 			            obs.x -= obs.speed;
-			            jCtx.fillText("🪨", obs.x, obs.y); // 암초 이모지
-			
-			            // 충돌 체크 (거북이와 암초의 거리가 가까워지면 게임오버)
-			            let dx = turtle.x - obs.x;
-			            let dy = turtle.y - obs.y;
-			            let distance = Math.sqrt(dx * dx + dy * dy);
 			            
-			            if (distance < 20) {
+			            // 높이에 따라 이모지 크기와 종류 변경
+			            if (obs.type === "tall") {
+			                jCtx.font = "40px Arial"; // 큰 사이즈
+			                jCtx.fillText("🪸", obs.x, obs.y - 10); // 산호 이모지 (위로 살짝 올림)
+			            } else {
+			                jCtx.font = "30px Arial"; // 기본 사이즈
+			                jCtx.fillText("🪨", obs.x, obs.y); // 암초 이모지
+			            }
+			
+			            // 충돌 체크 로직 (크기에 맞춰 충돌 범위 조정)
+			            let dx = turtle.x - obs.x;
+			            let dy = turtle.y - (obs.type === "tall" ? obs.y - 10 : obs.y);
+			            let distance = Math.sqrt(dx * dx + dy * dy);
+			            let collisionRadius = obs.type === "tall" ? 25 : 20; // 큰 장애물은 충돌 범위도 큼
+			            
+			            if (distance < collisionRadius) {
 			                gameOverJump();
 			            }
 			        }
 			
-			        // 화면 밖으로 나간 장애물 제거 및 점수 획득
+			        // 장애물 제거 및 점수 획득
 			        if (obstacles.length > 0 && obstacles[0].x < -30) {
 			            obstacles.shift();
 			            jScore += 10;
@@ -833,10 +845,10 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 			        jCtx.fillText("Game Over!", jCanvas.width / 2, jCanvas.height / 2);
 			    }
 			
-			    // 조작 이벤트 연결 (스페이스바, 마우스 클릭, 모바일 터치 모두 지원)
+			    // 조작 이벤트 (기존과 동일하게 유지)
 			    document.addEventListener("keydown", (e) => {
 			        if (e.code === "Space") { 
-			            e.preventDefault(); // 스페이스바로 스크롤 내려가는 것 방지
+			            e.preventDefault(); 
 			            jump(); 
 			        }
 			    });
@@ -855,11 +867,6 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 
 
 
-		</script>
-
-
-
-
-		
+		</script>		
 	</body>
 </html>
