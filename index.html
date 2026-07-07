@@ -201,8 +201,10 @@
 
 
 
+						
 
-							<!-- 미니게임 섹션 -->
+
+							<!-- 미니게임 1 섹션 -->
 							<section id="minigame" style="text-align: center; margin: 4em 0;">
 							    <h3>Take a Break! 🐢</h3>
 							    <p>GAME TIME!</p>
@@ -231,6 +233,18 @@
 
 
 
+
+
+							<section id="minigame2" style="text-align: center; margin: 4em 0;">
+							    <h3>Jumping Turtle! 🐢🌊</h3>
+							    <p>다가오는 암초(🪨)를 피해 점프하세요! (화면 터치 또는 스페이스바)</p>
+							    
+							    <canvas id="jumpCanvas" width="400" height="200" style="background-color: #e0f7fa; border: 2px solid #d5345e; border-radius: 8px; width: 100%; max-width: 400px; display: block; margin: 0 auto; touch-action: none; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></canvas>
+							    
+							    <p id="jumpScore" style="margin-top: 1em; font-size: 1.2em; font-weight: bold; color: #d5345e;">Score: 0</p>
+							    
+							    <button id="jumpStartBtn" style="background-color: #d5345e; color: white; border: none; padding: 0.8em 2em; border-radius: 4px; cursor: pointer;">Game Start</button>
+							</section>
 
 
 						
@@ -708,15 +722,140 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 				});
 							
 			    // 시작 버튼 클릭 이벤트
-			    startBtn.addEventListener("click", startGame);
+			    startBtn.addEventListener("click", startGame);	
+
+
+
+
+
+
+				
+
+
+
+			// ==========================================
+			    // 두 번째 게임: 점핑 거북이 로직
+			    // ==========================================
+			    const jCanvas = document.getElementById("jumpCanvas");
+			    const jCtx = jCanvas.getContext("2d");
+			    const jumpStartBtn = document.getElementById("jumpStartBtn");
+			    const jumpScoreEl = document.getElementById("jumpScore");
 			
-			</script>
+			    let turtle = { x: 50, y: 160, vy: 0, gravity: 0.8, jumpPower: -12, isGrounded: true };
+			    let obstacles = [];
+			    let jFrame = 0;
+			    let jScore = 0;
+			    let jGameLoop;
+			    let jGameActive = false;
+			
+			    // 게임 시작
+			    function startJumpGame() {
+			        turtle.y = 160; 
+			        turtle.vy = 0;
+			        obstacles = [];
+			        jFrame = 0; 
+			        jScore = 0;
+			        jGameActive = true;
+			        jumpScoreEl.innerText = "Score: 0";
+			        clearInterval(jGameLoop);
+			        jGameLoop = setInterval(updateJumpGame, 20); // 1초에 50번 화면 갱신(부드러운 움직임)
+			    }
+			
+			    // 점프 동작
+			    function jump() {
+			        if (turtle.isGrounded && jGameActive) {
+			            turtle.vy = turtle.jumpPower;
+			            turtle.isGrounded = false;
+			        }
+			    }
+			
+			    // 화면 갱신
+			    function updateJumpGame() {
+			        jFrame++;
+			        jCtx.clearRect(0, 0, jCanvas.width, jCanvas.height);
+			
+			        // 거북이 물리엔진 (중력 작용)
+			        turtle.vy += turtle.gravity;
+			        turtle.y += turtle.vy;
+			        
+			        // 바닥에 닿았을 때
+			        if (turtle.y >= 160) { 
+			            turtle.y = 160;
+			            turtle.isGrounded = true;
+			            turtle.vy = 0;
+			        }
+			
+			        // 거북이 그리기
+			        jCtx.font = "30px Arial";
+			        jCtx.textAlign = "center";
+			        jCtx.textBaseline = "middle";
+			        jCtx.fillText("🐢", turtle.x, turtle.y);
+			
+			        // 장애물 생성 (일정 프레임마다)
+			        if (jFrame % 70 === 0) { 
+			            // 속도는 갈수록 미세하게 빨라집니다.
+			            let speed = 5 + (jScore / 50); 
+			            obstacles.push({ x: jCanvas.width + 20, y: 160, speed: speed });
+			        }
+			
+			        // 장애물 이동 및 그리기
+			        for (let i = 0; i < obstacles.length; i++) {
+			            let obs = obstacles[i];
+			            obs.x -= obs.speed;
+			            jCtx.fillText("🪨", obs.x, obs.y); // 암초 이모지
+			
+			            // 충돌 체크 (거북이와 암초의 거리가 가까워지면 게임오버)
+			            let dx = turtle.x - obs.x;
+			            let dy = turtle.y - obs.y;
+			            let distance = Math.sqrt(dx * dx + dy * dy);
+			            
+			            if (distance < 20) {
+			                gameOverJump();
+			            }
+			        }
+			
+			        // 화면 밖으로 나간 장애물 제거 및 점수 획득
+			        if (obstacles.length > 0 && obstacles[0].x < -30) {
+			            obstacles.shift();
+			            jScore += 10;
+			            jumpScoreEl.innerText = "Score: " + jScore;
+			        }
+			    }
+			
+			    // 게임 오버
+			    function gameOverJump() {
+			        clearInterval(jGameLoop);
+			        jGameActive = false;
+			        jCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+			        jCtx.fillRect(0, 0, jCanvas.width, jCanvas.height);
+			        jCtx.fillStyle = "white";
+			        jCtx.font = "bold 24px Arial";
+			        jCtx.fillText("Game Over!", jCanvas.width / 2, jCanvas.height / 2);
+			    }
+			
+			    // 조작 이벤트 연결 (스페이스바, 마우스 클릭, 모바일 터치 모두 지원)
+			    document.addEventListener("keydown", (e) => {
+			        if (e.code === "Space") { 
+			            e.preventDefault(); // 스페이스바로 스크롤 내려가는 것 방지
+			            jump(); 
+			        }
+			    });
+			    jCanvas.addEventListener("mousedown", jump);
+			    jCanvas.addEventListener("touchstart", (e) => { 
+			        e.preventDefault(); 
+			        jump(); 
+			    });
+			
+			    jumpStartBtn.addEventListener("click", startJumpGame);
 
 
 
 
+		
 
 
+
+		</script>
 
 
 
