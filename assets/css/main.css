@@ -3314,3 +3314,60 @@ input, select, textarea {
 			}
 
 	}
+
+
+
+
+
+
+/* Custom Timeline Style */
+.cv-timeline {
+    display: flex;
+    flex-direction: column;
+    margin: 2em 0;
+}
+.cv-item {
+    display: flex;
+    position: relative;
+}
+.cv-date {
+    width: 140px; /* 왼쪽 연도 부분 너비 */
+    flex-shrink: 0;
+    font-weight: 700;
+    text-align: left;
+    padding-top: 0.1em;
+    font-size: 0.9em;
+    color: #777;
+}
+.cv-marker {
+    position: relative;
+    width: 2px;
+    background-color: #e4e4e4; /* 회색 세로선 */
+    margin: 0 25px; /* 선 양옆 여백 */
+}
+.cv-marker::after {
+    content: '';
+    position: absolute;
+    top: 0.3em;
+    left: -6px; /* 점 위치 중앙 정렬 */
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #d5345e; /* 설정하신 메인 컬러 포인트! */
+}
+.cv-item:last-child .cv-marker {
+    background-color: transparent; /* 마지막 항목 아래로는 선이 안 보이게 */
+}
+.cv-content {
+    padding-bottom: 2.5em; /* 다음 항목과의 간격 */
+    flex-grow: 1;
+}
+.cv-content h4 {
+    margin: 0 0 0.4em 0;
+    font-size: 1.1em;
+}
+.cv-content p {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.6em;
+}
