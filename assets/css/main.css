@@ -3371,3 +3371,48 @@ input, select, textarea {
     font-size: 0.9em;
     line-height: 1.6em;
 }
+
+
+
+/* Custom Publications Style with Hover Effect */
+.pub-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2.5em;
+}
+
+.pub-label {
+    width: 130px;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: #777;
+    font-size: 0.9em;
+    padding-top: 0.2em;
+}
+
+.pub-content {
+    flex-grow: 1;
+    /* 평소에는 아주 얇고 연한 회색 선 */
+    border-left: solid 2px #f4f4f4; 
+    padding-left: 1.5em;
+    /* 마우스를 올릴 때 선이 부드럽게 두꺼워지고 색이 변하는 애니메이션 */
+    transition: border-color 0.3s ease, border-width 0.3s ease; 
+}
+
+/* 마우스를 올렸을 때(Hover)의 디자인 변화 */
+.pub-item:hover .pub-content {
+    /* 굵은 버건디 핑크색으로 강조! */
+    border-left: solid 4px #d5345e; 
+}
+
+.pub-content h4 {
+    margin: 0 0 0.4em 0;
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.pub-content p {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.6em;
+}
