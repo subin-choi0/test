@@ -3416,3 +3416,28 @@ input, select, textarea {
     font-size: 0.9em;
     line-height: 1.6em;
 }
+
+
+
+
+/* 스마트폰 화면(너비 768px 이하)을 위한 모바일 최적화 */
+@media screen and (max-width: 768px) {
+    .cv-date, .pub-label {
+        width: 90px; /* 모바일에서는 날짜 영역 너비를 살짝 줄임 */
+        font-size: 0.85em;
+    }
+    .cv-marker {
+        margin: 0 12px; /* 선 양옆 여백 축소 */
+    }
+    .cv-content, .pub-content {
+        padding-left: 1em;
+    }
+    .cv-content p, .pub-content p {
+        word-break: break-all; /* 화면 밖으로 나가는 긴 텍스트 강제 줄바꿈 */
+    }
+}
+
+
+
+
+
