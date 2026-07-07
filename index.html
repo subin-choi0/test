@@ -199,6 +199,29 @@
 								</div>
 							</section>
 
+
+
+
+							<!-- 미니게임 섹션 -->
+							<section id="minigame" style="text-align: center; margin: 4em 0;">
+							    <h3>Take a Break! 🐍</h3>
+							    <p>데이터(먹이)를 먹고 길어지는 파이썬.. 아니, 스네이크 게임 한 판 어떠신가요?</p>
+							    
+							    <!-- 게임 화면 -->
+							    <canvas id="snakeCanvas" width="400" height="400" style="background-color: #f4f4f4; border: 2px solid #d5345e; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></canvas>
+							    
+							    <br />
+							    <!-- 게임 시작 버튼 -->
+							    <button id="startBtn" style="margin-top: 1em; background-color: #d5345e; color: white; border: none; padding: 0.8em 2em; border-radius: 4px; cursor: pointer;">Game Start</button>
+							</section>
+
+
+
+
+
+
+						
+
 						<!-- Five -->
 						<!--
 							<section id="five">
@@ -553,5 +576,109 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 
+
+
+
+
+
+
+			<script>
+			    const canvas = document.getElementById("snakeCanvas");
+			    const ctx = canvas.getContext("2d");
+			    const startBtn = document.getElementById("startBtn");
+			
+			    const gridSize = 20; // 뱀과 먹이의 크기
+			    let snake = [{ x: 200, y: 200 }]; // 뱀의 초기 위치 (파이썬 리스트 구조와 동일합니다)
+			    let food = { x: 100, y: 100 }; // 먹이의 위치
+			    let dx = gridSize; // x축 이동 방향
+			    let dy = 0; // y축 이동 방향
+			    let gameLoop; // 게임 실행 타이머
+			
+			    // 1. 게임 시작 함수
+			    function startGame() {
+			        snake = [{ x: 200, y: 200 }];
+			        dx = gridSize;
+			        dy = 0;
+			        placeFood();
+			        clearInterval(gameLoop);
+			        // 0.1초(100ms)마다 화면을 갱신하며 뱀을 움직임
+			        gameLoop = setInterval(update, 100); 
+			    }
+			
+			    // 2. 화면 갱신 함수 (핵심 로직)
+			    function update() {
+			        // 뱀의 머리 계산
+			        const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+			        snake.unshift(head); // 리스트 맨 앞에 새 머리 추가
+			
+			        // 먹이를 먹었는지 확인
+			        if (head.x === food.x && head.y === food.y) {
+			            placeFood(); // 먹이를 새로 배치 (꼬리는 자르지 않아서 길어짐)
+			        } else {
+			            snake.pop(); // 먹이를 안 먹었으면 꼬리를 자름 (이동하는 효과)
+			        }
+			
+			        // 벽에 부딪혔는지 검사 (게임 오버)
+			        if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+			            clearInterval(gameLoop);
+			            alert("Game Over! 다시 도전해보세요.");
+			            return;
+			        }
+			
+			        draw(); // 계산된 위치를 화면에 그림
+			    }
+			
+			    // 3. 화면 그리기 함수
+			    function draw() {
+			        // 캔버스 초기화 (이전 프레임 지우기)
+			        ctx.fillStyle = "#f4f4f4";
+			        ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			        // 먹이 그리기 (포인트 컬러)
+			        ctx.fillStyle = "#d5345e";
+			        ctx.fillRect(food.x, food.y, gridSize, gridSize);
+			
+			        // 뱀 그리기 (어두운 회색)
+			        ctx.fillStyle = "#555";
+			        snake.forEach(part => {
+			            ctx.fillRect(part.x, part.y, gridSize, gridSize);
+			        });
+			    }
+			
+			    // 4. 먹이 랜덤 배치 함수
+			    function placeFood() {
+			        food.x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
+			        food.y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
+			    }
+			
+			    // 5. 키보드 방향키 조작 이벤트 (데이터 프레임의 인덱스를 다루듯 방향 제어)
+			    document.addEventListener("keydown", (event) => {
+			        const key = event.key;
+			        if (key === "ArrowUp" && dy === 0) { dx = 0; dy = -gridSize; }
+			        if (key === "ArrowDown" && dy === 0) { dx = 0; dy = gridSize; }
+			        if (key === "ArrowLeft" && dx === 0) { dx = -gridSize; dy = 0; }
+			        if (key === "ArrowRight" && dx === 0) { dx = gridSize; dy = 0; }
+			        
+			        // 방향키 조작 시 스크롤이 움직이는 것을 방지
+			        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(key) > -1) {
+			            event.preventDefault();
+			        }
+			    });
+			
+			    // 시작 버튼 클릭 이벤트
+			    startBtn.addEventListener("click", startGame);
+			
+			</script>
+
+
+
+
+
+
+
+
+
+
+		
 	</body>
 </html>
